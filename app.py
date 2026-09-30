@@ -25,6 +25,28 @@ if demo_guto:
 
 st.caption("Acompanhamento eleitoral com dados oficiais do TSE.")
 
+# Rota de demonstração isolada: não depende da sessão nem dos candidatos adicionados.
+if demo_guto:
+    st.error("DEMONSTRAÇÃO — DADOS SIMULADOS. Não representa resultado eleitoral real.")
+    st.image("guto_demo.JPG", use_container_width=True)
+    st.subheader("GUTO JOSÉ")
+    st.caption("20620 • Deputado Estadual • SP")
+    d1, d2 = st.columns(2)
+    d1.metric("Votos simulados", "80.000")
+    d2.metric("Apuração simulada", "99,2%")
+    st.progress(0.992, text="99,2% da apuração simulada")
+    st.subheader("Exemplo de detalhamento municipal")
+    st.dataframe(pd.DataFrame([
+        {"Município":"Carapicuíba","Votos":32000},
+        {"Município":"São Paulo","Votos":18000},
+        {"Município":"Osasco","Votos":11000},
+        {"Município":"Barueri","Votos":7000},
+        {"Município":"Cotia","Votos":5000},
+        {"Município":"Outros municípios","Votos":7000},
+    ]), use_container_width=True, hide_index=True)
+    st.caption("Os números desta tela são fictícios e existem exclusivamente para demonstrar o funcionamento do painel.")
+    st.stop()
+
 if "tracked" not in st.session_state: st.session_state.tracked=[]
 if "viewer_name" not in st.session_state: st.session_state.viewer_name=""
 

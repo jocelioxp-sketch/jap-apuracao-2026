@@ -19,7 +19,7 @@ logo=Path("assets/jap_logo.jpeg")
 if logo.exists(): st.image(str(logo),width=330)
 else: st.title("GRUPO JAP"); st.caption("Tecnologia & Inovação")
 st.header("Apuração Eleições 2026")
-demo_guto = st.query_params.get("demo","") == "guto"
+demo_guto = str(st.query_params.get("demo", "")).lower() == "guto"
 if demo_guto:
     st.warning("MODO DEMONSTRAÇÃO • Os dados abaixo são fictícios e servem apenas para apresentar como será a apuração.")
 

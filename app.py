@@ -84,7 +84,7 @@ if demo_guto:
     st.subheader("Demonstração • Deputado Estadual/SP")
     demo_cols=st.columns(4)
     with demo_cols[0]:
-        st.image("https://raw.githubusercontent.com/jocelioxp-sketch/jap-apuracao-2026/main/assets/guto_demo.jpg", use_container_width=True)
+        st.image("guto_demo.JPG", use_container_width=True)
         st.subheader("GUTO JOSÉ")
         st.caption("20620 • Deputado Estadual • SP")
         st.metric("Votos", "80.000")

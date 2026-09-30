@@ -1,4 +1,6 @@
 import time
+import base64
+from io import BytesIO
 from datetime import datetime
 from pathlib import Path
 import pandas as pd
@@ -17,6 +19,10 @@ logo=Path("assets/jap_logo.jpeg")
 if logo.exists(): st.image(str(logo),width=330)
 else: st.title("GRUPO JAP"); st.caption("Tecnologia & Inovação")
 st.header("Apuração Eleições 2026")
+demo_guto = st.query_params.get("demo","") == "guto"
+if demo_guto:
+    st.warning("MODO DEMONSTRAÇÃO • Os dados abaixo são fictícios e servem apenas para apresentar como será a apuração.")
+
 st.caption("Acompanhamento eleitoral com dados oficiais do TSE.")
 
 if "tracked" not in st.session_state: st.session_state.tracked=[]
@@ -58,7 +64,28 @@ def get_candidate(item):
 if st.session_state.viewer_name:
     st.write(f"Painel de **{st.session_state.viewer_name}**")
 
-if not st.session_state.tracked:
+if demo_guto:
+    st.subheader("Demonstração • Deputado Estadual/SP")
+    demo_cols=st.columns(4)
+    with demo_cols[0]:
+        st.image("https://raw.githubusercontent.com/jocelioxp-sketch/jap-apuracao-2026/main/assets/guto_demo.jpg", use_container_width=True)
+        st.subheader("GUTO JOSÉ")
+        st.caption("20620 • Deputado Estadual • SP")
+        st.metric("Votos", "80.000")
+        st.metric("Seções totalizadas", "99,2%")
+        st.progress(0.992)
+    st.caption("SIMULAÇÃO: 80.000 votos e 99,2% de totalização são números fictícios usados exclusivamente para demonstração.")
+    st.subheader("Exemplo de detalhamento municipal")
+    demo_df=pd.DataFrame([
+        {"Município":"Carapicuíba","Votos":32000},
+        {"Município":"São Paulo","Votos":18000},
+        {"Município":"Osasco","Votos":11000},
+        {"Município":"Barueri","Votos":7000},
+        {"Município":"Cotia","Votos":5000},
+        {"Município":"Outros municípios","Votos":7000},
+    ])
+    st.dataframe(demo_df,use_container_width=True,hide_index=True)
+elif not st.session_state.tracked:
     st.info("Adicione de 1 a 4 candidatos no menu lateral para montar seu painel.")
 else:
     cols=st.columns(4)

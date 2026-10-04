@@ -85,6 +85,49 @@ else:
                     st.session_state.tracked.pop(i);st.rerun()
 
 st.divider()
+st.header("Consulta por cidade")
+st.caption("Votação nominal no município, ordenada pela quantidade de votos apurados.")
+
+city_uf=st.selectbox("UF da consulta",["SP","AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SE","TO"],key="city_uf")
+city_office_name=st.selectbox("Cargo na cidade",["Deputado Federal","Deputado Estadual"] if city_uf!="DF" else ["Deputado Federal","Deputado Distrital"],key="city_office")
+city_office=OFFICES[city_office_name]
+
+@st.cache_data(ttl=3600,show_spinner=False)
+def get_municipalities(uf):
+    return TSEClient("official").municipalities(uf)
+
+try:
+    municipalities=get_municipalities(city_uf)
+except Exception:
+    municipalities=[]
+
+if municipalities:
+    labels={f'{m["name"]} — {m["code"]}':m for m in municipalities}
+    selected_label=st.selectbox("Município",list(labels.keys()),key="city")
+    selected_city=labels[selected_label]
+    search_name=st.text_input("Buscar candidato por nome ou número",placeholder="Digite parte do nome ou o número",key="city_search")
+    try:
+        municipal_client=TSEClient("official")
+        payload=municipal_client.fetch_result(city_uf,selected_city["code"],city_office)
+        rows=municipal_client.candidates(payload)
+        df=pd.DataFrame(rows)
+        if not df.empty:
+            df=df.sort_values(["votes","name"],ascending=[False,True],kind="stable")
+            df.insert(0,"Ordem por votos",range(1,len(df)+1))
+            if search_name.strip():
+                q=search_name.strip().casefold()
+                df=df[df["name"].str.casefold().str.contains(q,regex=False) | df["number"].astype(str).str.contains(q,regex=False)]
+            df=df[["Ordem por votos","name","number","votes"]].rename(columns={"name":"Candidato","number":"Número","votes":"Votos"})
+            st.dataframe(df,use_container_width=True,hide_index=True)
+            st.caption(f'Dados oficiais do TSE • {selected_city["name"]}/{city_uf} • {city_office_name}')
+        else:
+            st.info("Aguardando dados de votação nominal deste município.")
+    except Exception:
+        st.info("Os dados municipais ainda não estão disponíveis para esta consulta no TSE.")
+else:
+    st.info("A lista de municípios ainda não está disponível para esta UF.")
+
+st.divider()
 st.header("Acompanhamento incluído")
 base_uf=st.session_state.tracked[0]["uf"] if st.session_state.tracked else uf
 

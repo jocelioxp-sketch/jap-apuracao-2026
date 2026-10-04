@@ -19,33 +19,9 @@ logo=Path("assets/jap_logo.jpeg")
 if logo.exists(): st.image(str(logo),width=330)
 else: st.title("GRUPO JAP"); st.caption("Tecnologia & Inovação")
 st.header("Apuração Eleições 2026")
-demo_guto = str(st.query_params.get("demo", "")).lower() == "guto"
-if demo_guto:
-    st.warning("MODO DEMONSTRAÇÃO • Os dados abaixo são fictícios e servem apenas para apresentar como será a apuração.")
 
 st.caption("Acompanhamento eleitoral com dados oficiais do TSE.")
 
-# Rota de demonstração isolada: não depende da sessão nem dos candidatos adicionados.
-if demo_guto:
-    st.error("DEMONSTRAÇÃO — DADOS SIMULADOS. Não representa resultado eleitoral real.")
-    st.image("guto_demo.JPG", use_container_width=True)
-    st.subheader("GUTO JOSÉ")
-    st.caption("20620 • Deputado Estadual • SP")
-    d1, d2 = st.columns(2)
-    d1.metric("Votos simulados", "80.000")
-    d2.metric("Apuração simulada", "99,2%")
-    st.progress(0.992, text="99,2% da apuração simulada")
-    st.subheader("Exemplo de detalhamento municipal")
-    st.dataframe(pd.DataFrame([
-        {"Município":"Carapicuíba","Votos":32000},
-        {"Município":"São Paulo","Votos":18000},
-        {"Município":"Osasco","Votos":11000},
-        {"Município":"Barueri","Votos":7000},
-        {"Município":"Cotia","Votos":5000},
-        {"Município":"Outros municípios","Votos":7000},
-    ]), use_container_width=True, hide_index=True)
-    st.caption("Os números desta tela são fictícios e existem exclusivamente para demonstrar o funcionamento do painel.")
-    st.stop()
 
 if "tracked" not in st.session_state: st.session_state.tracked=[]
 if "viewer_name" not in st.session_state: st.session_state.viewer_name=""
@@ -65,8 +41,7 @@ with st.sidebar:
     if st.session_state.tracked:
         st.caption(f"{len(st.session_state.tracked)}/4 candidatos")
         if st.button("Limpar candidatos",use_container_width=True): st.session_state.tracked=[]; st.rerun()
-    mode_label=st.radio("Fonte",["Oficial 2026","Simulado TSE"],index=0)
-    mode="official" if mode_label.startswith("Oficial") else "simulation"
+    mode="official"
     auto=st.toggle("Atualização automática",value=True)
     st.divider()
     demo_guto=st.toggle("DEMO • Guto José",value=False,help="Exibe dados fictícios apenas para demonstração visual.")
@@ -85,45 +60,7 @@ def get_candidate(item):
         return client.find(p,item["number"])
     except: return None
 
-if demo_guto:
-    st.error("DEMONSTRAÇÃO — DADOS SIMULADOS. Os números abaixo não representam resultado eleitoral real.")
-    st.session_state.viewer_name = "Demonstração JAP"
-    demo_item={"uf":"SP","office_name":"Deputado Estadual","office":"7","number":"20620"}
-    st.subheader("GUTO JOSÉ")
-    st.caption("20620 • Deputado Estadual • SP")
-    d1,d2,d3,d4=st.columns(4)
-    d1.metric("Votos simulados","80.000")
-    d2.metric("Apuração simulada","98,7%")
-    d3.metric("UF","SP")
-    d4.metric("Situação","Demonstração")
-    st.progress(0.987,text="98,7% da apuração simulada")
-    st.caption("No dia da eleição, este bloco será alimentado pelos arquivos oficiais do TSE.")
-
-if st.session_state.viewer_name:
-    st.write(f"Painel de **{st.session_state.viewer_name}**")
-
-if demo_guto:
-    st.subheader("Demonstração • Deputado Estadual/SP")
-    demo_cols=st.columns(4)
-    with demo_cols[0]:
-        st.image("guto_demo.JPG", use_container_width=True)
-        st.subheader("GUTO JOSÉ")
-        st.caption("20620 • Deputado Estadual • SP")
-        st.metric("Votos", "80.000")
-        st.metric("Seções totalizadas", "99,2%")
-        st.progress(0.992)
-    st.caption("SIMULAÇÃO: 80.000 votos e 99,2% de totalização são números fictícios usados exclusivamente para demonstração.")
-    st.subheader("Exemplo de detalhamento municipal")
-    demo_df=pd.DataFrame([
-        {"Município":"Carapicuíba","Votos":32000},
-        {"Município":"São Paulo","Votos":18000},
-        {"Município":"Osasco","Votos":11000},
-        {"Município":"Barueri","Votos":7000},
-        {"Município":"Cotia","Votos":5000},
-        {"Município":"Outros municípios","Votos":7000},
-    ])
-    st.dataframe(demo_df,use_container_width=True,hide_index=True)
-elif not st.session_state.tracked:
+if not st.session_state.tracked:
     st.info("Adicione de 1 a 4 candidatos no menu lateral para montar seu painel.")
 else:
     cols=st.columns(4)

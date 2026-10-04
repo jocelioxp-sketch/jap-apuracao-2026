@@ -50,3 +50,25 @@ class TSEClient:
         if not sqcand:return None
         eid=self.election_id(office); c=self.cfg
         return f'{c["base"]}/{c["environment"]}/{c["cycle"]}/{eid}/fotos/{uf.lower()}/{sqcand}.jpeg'
+
+
+    def municipalities(self, uf):
+        """Retorna municípios da UF a partir do arquivo oficial EA12 do TSE."""
+        eid=self.cfg["federal_election"]; c=self.cfg
+        url=f'{c["base"]}/{c["environment"]}/{c["cycle"]}/{eid}/config/mun-e{int(eid):06d}-cm.json'
+        payload=self._get(url)
+        out=[]
+        def walk(o):
+            if isinstance(o,dict):
+                code=self.pick(o,["cd","c","codigo","cdmun","mu"],"")
+                name=self.pick(o,["nm","n","nome","nmmun"],"")
+                ufv=str(self.pick(o,["uf","sg","sguf"],"")).upper()
+                if code and name and (not ufv or ufv==uf.upper()):
+                    code=str(code).zfill(5)
+                    if code.isdigit(): out.append({"code":code,"name":str(name)})
+                for v in o.values(): walk(v)
+            elif isinstance(o,list):
+                for v in o: walk(v)
+        walk(payload)
+        uniq={(x["code"],x["name"]):x for x in out}
+        return sorted(uniq.values(),key=lambda x:x["name"])
